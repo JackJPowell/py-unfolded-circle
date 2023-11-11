@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "py-unfolded-circle"
+name = "py_unfolded_circle"
 version = "0.0.1"
 authors = [
   { name="Jack Powell", email="jackjpowell@gmail.com" },
