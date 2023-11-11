@@ -1,1 +1,1 @@
-from pyUnfoldedCircleRemote.remote import remote
+from pyUnfoldedCircleRemote.remote import UCRemote
