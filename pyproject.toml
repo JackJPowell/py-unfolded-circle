@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "py-unfolded-circle"
+version = "0.0.1"
+authors = [
+  { name="Jack Powell", email="jackjpowell@gmail.com" },
+]
+description = "A python library to interact with the Unfolded Circle Remote"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/jackjpowell/py-unfolded-circle"
+"Bug Tracker" = "https://github.com/jackjpowell/py-unfolded-circle/issues"
