@@ -73,6 +73,8 @@ class UCRemote:
         self._sw_version = ""
         self._automatic_updates = bool
         self._available_update = []
+        self._latest_sw_version = ""
+        self._release_notes_url = ""
         self._online = True
 
     @property
@@ -154,6 +156,16 @@ class UCRemote:
     def available_update(self):
         """List of available updates"""
         return self._available_update
+
+    @property
+    def latest_sw_version(self):
+        """Latest software release version"""
+        return self._latest_sw_version
+
+    @property
+    def release_notes_url(self):
+        """Release notes url"""
+        return self._release_notes_url
 
     def validate_url(self, uri):
         """Validates passed in URL and attempts to correct api endpoint if path isn't supplied"""
@@ -263,6 +275,15 @@ class UCRemote:
                 self._hw_revision = information["hw_revision"]
                 return information
 
+    async def get_remote_configuration(self) -> str:
+        """Get System configuration from remote"""
+        async with self.client() as session:
+            async with session.get(self.url("cfg")) as response:
+                await self.raise_on_error(response)
+                information = await response.json()
+                self._name = information.get("device").get("name")
+                return information
+
     async def get_remote_battery_information(self) -> str:
         """Get Battery information from remote"""
         async with self.client() as session:
@@ -297,6 +318,18 @@ class UCRemote:
                 self._automatic_updates = information["update_check_enabled"]
                 if "available" in information.keys():
                     self._available_update = information["available"]
+                    for update in self._available_update:
+                        if update.get("channel") == "STABLE":
+                            if (
+                                self._latest_sw_version == ""
+                                or self._latest_sw_version < update.get("version")
+                            ):
+                                self._release_notes_url = update.get(
+                                    "release_notes_url"
+                                )
+                                self._latest_sw_version = update.get("version")
+                else:
+                    self._latest_sw_version = self._sw_version
                 return information
 
     async def get_remote_force_update_information(self) -> bool:
@@ -343,6 +376,8 @@ class UCRemote:
         await self.get_remote_battery_information()
         await self.get_remote_ambient_light_information()
         await self.get_remote_update_information()
+        await self.get_remote_configuration()
+        await self.get_remote_information()
 
 
 class Activity:
