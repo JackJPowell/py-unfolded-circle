@@ -366,13 +366,14 @@ class UCRemote:
         """Get activity state for a remote entity"""
         async with self.client() as session:
             async with session.get(self.url("activities?page=1&limit=10")) as response:
+                await self.raise_on_error(response)
                 current_activities = await response.json()
                 for current_activity in current_activities:
                     if entity_id == current_activity["entity_id"]:
                         return current_activity["attributes"]["state"]
 
     async def update(self):
-        "Retrivies all information about the remote"
+        """Retrivies all information about the remote"""
         await self.get_remote_battery_information()
         await self.get_remote_ambient_light_information()
         await self.get_remote_update_information()
@@ -387,7 +388,7 @@ class Activity:
         self._name = activity["name"]["en"]
         self._id = activity["entity_id"]
         self._remote = remote
-        self._state = "OFF"
+        self._state = activity.get("attributes").get("state")
 
     @property
     def name(self):
@@ -438,7 +439,7 @@ class Activity:
     async def update(self) -> None:
         """Updates activity state information"""
         self._state = await self._remote.get_activity_state(self._id)
-        await self._remote.update()
+        # await self._remote.update()
 
 
 def discover_devices(apikey):
