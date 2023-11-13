@@ -417,7 +417,7 @@ class Activity:
             async with session.put(
                 self._remote.url("entities/" + self._id + "/command"), json=body
             ) as response:
-                self._remote.raise_on_error(response)
+                await self._remote.raise_on_error(response)
                 self._state = "ON"
 
     async def turn_off(self) -> None:
@@ -428,7 +428,7 @@ class Activity:
             async with session.put(
                 self._remote.url("entities/" + self._id + "/command"), json=body
             ) as response:
-                self._remote.raise_on_error(response)
+                await self._remote.raise_on_error(response)
                 self._state = "OFF"
 
     def is_on(self) -> bool:
