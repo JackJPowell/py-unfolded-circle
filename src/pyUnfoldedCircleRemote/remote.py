@@ -4,6 +4,7 @@ import copy
 from urllib.parse import urljoin, urlparse
 import aiohttp
 import zeroconf
+import re
 
 ZEROCONF_TIMEOUT = 3
 ZEROCONF_SERVICE_TYPE = "_uc-remote._tcp.local."
@@ -169,6 +170,10 @@ class UCRemote:
 
     def validate_url(self, uri):
         """Validates passed in URL and attempts to correct api endpoint if path isn't supplied"""
+        if re.search("^http.*", uri) is None:
+            uri = (
+                "http://" + uri
+            )  # Normalize to absolute URLs so urlparse will parse the way we want
         parsed_url = urlparse(uri)
         if parsed_url.path == "/":  # Only host supplied
             uri = uri + "api/"
