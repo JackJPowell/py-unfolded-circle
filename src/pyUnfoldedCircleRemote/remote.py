@@ -1,10 +1,12 @@
+"""Module to interact with the Unfolded Circle Remote Two"""
 import socket
 import time
 import copy
+import re
 from urllib.parse import urljoin, urlparse
 import aiohttp
 import zeroconf
-import re
+
 
 ZEROCONF_TIMEOUT = 3
 ZEROCONF_SERVICE_TYPE = "_uc-remote._tcp.local."
