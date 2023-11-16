@@ -215,7 +215,7 @@ class UCRemote:
     async def get_activities(self):
         """Returns activities from UC Remote"""
         async with self.client() as session:
-            async with session.get(self.url("activities?page=1&limit=10")) as response:
+            async with session.get(self.url("activities")) as response:
                 await self.raise_on_error(response)
                 for activity in await response.json():
                     self.activities.append(Activity(activity=activity, remote=self))
