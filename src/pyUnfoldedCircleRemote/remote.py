@@ -170,8 +170,6 @@ class UCRemote:
     def validate_url(self, uri):
         """Validates passed in URL and attempts to correct api endpoint if path isn't supplied"""
         parsed_url = urlparse(uri)
-        if parsed_url.scheme not in ["http", "https"]:
-            raise ValueError(f"Endpoint {uri} should begin with http or https")
         if parsed_url.path == "/":  # Only host supplied
             uri = uri + "api/"
             return uri
