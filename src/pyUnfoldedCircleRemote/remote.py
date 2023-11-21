@@ -13,6 +13,14 @@ ZEROCONF_SERVICE_TYPE = "_uc-remote._tcp.local."
 
 AUTH_APIKEY_NAME = "pyUnfoldedCircle"
 AUTH_USERNAME = "web-configurator"
+SYSTEM_COMMANDS = [
+    "STANDBY",
+    "REBOOT",
+    "POWER_OFF",
+    "RESTART",
+    "RESTART_UI",
+    "RESTART_CORE",
+]
 
 
 class HTTPError(Exception):
@@ -26,6 +34,30 @@ class HTTPError(Exception):
 
 class AuthenticationError(Exception):
     """Raised when HTTP login fails."""
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+class SystemCommandNotFound(Exception):
+    """Raised when an invalid system command is supplied"""
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+class InvalidIRFormat(Exception):
+    """Raised when invalid or insufficient IR details are passed"""
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+class NoEmitterFound(Exception):
+    """Raised when no emitter could be identified from criteria given"""
 
     def __init__(self, message):
         self.message = message
@@ -58,6 +90,7 @@ class UCRemote:
 
     def __init__(self, api_url, pin=None, apikey=None) -> None:
         self.endpoint = self.validate_url(api_url)
+        self.configuration_url = self.derive_configuration_url()
         self.apikey = apikey
         self.pin = pin
         self.activities = []
@@ -79,11 +112,29 @@ class UCRemote:
         self._latest_sw_version = ""
         self._release_notes_url = ""
         self._online = True
+        self._memory_total = 0
+        self._memory_available = 0
+        self._storage_total = 0
+        self._storage_available = 0
+        self._remotes = []
+        self._docks = []
+        self._ir_custom = []
+        self._ir_codesets = []
 
     @property
     def name(self):
         """Name of the remote"""
         return self._name or "Unfolded Circle Remote Two"
+
+    @property
+    def memory_available(self):
+        """Percentage of Memory used on the remote"""
+        return int(round(self._memory_available, 0))
+
+    @property
+    def storage_available(self):
+        """Percentage of Storage used on the remote"""
+        return int(round(self._storage_available, 0))
 
     @property
     def sw_version(self):
@@ -133,7 +184,10 @@ class UCRemote:
     @property
     def hw_revision(self):
         """Remote Hardware Revision"""
-        return self._hw_revision
+        if self._hw_revision == "rev2":
+            return "Revision 2"
+        else:
+            return self._hw_revision
 
     @property
     def battery_status(self):
@@ -177,6 +231,9 @@ class UCRemote:
                 "http://" + uri
             )  # Normalize to absolute URLs so urlparse will parse the way we want
         parsed_url = urlparse(uri)
+        # valdation = set(uri)
+        if parsed_url.scheme == "":
+            uri = "http://" + uri
         if parsed_url.path == "/":  # Only host supplied
             uri = uri + "api/"
             return uri
@@ -188,6 +245,14 @@ class UCRemote:
         ):  # User supplied an endpoint, make sure it has a trailing slash
             uri = uri + "/"
         return uri
+
+    def derive_configuration_url(self) -> str:
+        """Derives configuration url from endpoint url"""
+        parsed_url = urlparse(self.endpoint)
+        self.configuration_url = (
+            f"{parsed_url.scheme}://{parsed_url.netloc}/configurator/"
+        )
+        return self.configuration_url
 
     async def raise_on_error(self, response):
         """Raise an HTTP error if the response returns poorly"""
@@ -324,7 +389,7 @@ class UCRemote:
                 if "available" in information.keys():
                     self._available_update = information["available"]
                     for update in self._available_update:
-                        if update.get("channel") == "STABLE":
+                        if update.get("channel") in ["STABLE", "TESTING"]:
                             if (
                                 self._latest_sw_version == ""
                                 or self._latest_sw_version < update.get("version")
@@ -333,6 +398,8 @@ class UCRemote:
                                     "release_notes_url"
                                 )
                                 self._latest_sw_version = update.get("version")
+                        else:
+                            self._latest_sw_version = self._sw_version
                 else:
                     self._latest_sw_version = self._sw_version
                 return information
@@ -370,12 +437,162 @@ class UCRemote:
     async def get_activity_state(self, entity_id) -> str:
         """Get activity state for a remote entity"""
         async with self.client() as session:
-            async with session.get(self.url("activities?page=1&limit=10")) as response:
+            async with session.get(self.url("activities")) as response:
                 await self.raise_on_error(response)
                 current_activities = await response.json()
                 for current_activity in current_activities:
                     if entity_id == current_activity["entity_id"]:
                         return current_activity["attributes"]["state"]
+
+    async def post_system_command(self, cmd) -> str:
+        """POST a system command to the remote"""
+        if cmd in SYSTEM_COMMANDS:
+            async with self.client() as session:
+                async with session.post(self.url("/system?cmd=" + cmd)) as response:
+                    await self.raise_on_error(response)
+                    response = await response.json()
+                    return response
+        else:
+            raise SystemCommandNotFound("Invalid System Command Supplied")
+
+    async def get_remotes(self) -> []:
+        """Get list of remotes defined"""
+        remote_data = {}
+        async with self.client() as session:
+            async with session.get(self.url("remotes")) as response:
+                await self.raise_on_error(response)
+                remotes = await response.json()
+                for remote in remotes:
+                    if remote.get("enabled") is True:
+                        remote_data = dict(
+                            {
+                                "name": remote.get("name").get("en"),
+                                "entity_id": remote.get("entity_id"),
+                            }
+                        )
+                        self._remotes.append(remote_data.copy())
+                return self._remotes
+
+    async def get_custom_codesets(self) -> []:
+        """Get list of remotes defined"""
+        ir_data = {}
+        async with self.client() as session:
+            async with session.get(self.url("ir/codes/custom")) as response:
+                await self.raise_on_error(response)
+                code_sets = await response.json()
+                for ir in code_sets:
+                    ir_data = dict(
+                        {
+                            "device": ir.get("device"),
+                            "device_id": ir.get("device_id"),
+                        }
+                    )
+                    self._ir_custom.append(ir_data.copy())
+                return self._ir_custom
+
+    async def get_remote_codesets(self) -> []:
+        """Get list of remote codeset"""
+        ir_data = {}
+        for remote in self._remotes:
+            async with self.client() as session:
+                async with session.get(
+                    self.url("remotes/" + remote.get("entity_id") + "/ir")
+                ) as response:
+                    await self.raise_on_error(response)
+                    code_set = await response.json()
+                    ir_data = dict(
+                        {
+                            "name": remote.get("name"),
+                            "device_id": code_set.get("id"),
+                        }
+                    )
+                    self._ir_codesets.append(ir_data.copy())
+        return self._ir_codesets
+
+    async def get_docks(self) -> []:
+        """Get list of docks defined"""
+        dock_data = {}
+        async with self.client() as session:
+            async with session.get(self.url("ir/emitters")) as response:
+                await self.raise_on_error(response)
+                docks = await response.json()
+                for dock in docks:
+                    if dock.get("active") is True:
+                        dock_data = dict(
+                            {
+                                "name": dock.get("name"),
+                                "device_id": dock.get("device_id"),
+                            }
+                        )
+                        self._docks.append(dock_data.copy())
+                return self._docks
+
+    async def send_remote_command(
+        self, device="", command="", repeat=0, **kwargs
+    ) -> bool:
+        """Send a remote command to the dock
+        kwargs: code,format,dock,port"""
+        body_port = {}
+        body_repeat = {}
+        if "code" in kwargs and "format" in kwargs:
+            #Send an IR command (HEX/PRONTO)
+            body = {"code": kwargs.get("code"), "format": kwargs.get("format")}
+        if device != "" and command != "":
+            #Send a predefined code
+            ir_code = next(
+                (code for code in self._ir_codesets if code.get("name") == device),
+                dict,
+            )
+            body = {"codeset_id": ir_code.get("device_id"), "cmd_id": command}
+        else:
+            raise InvalidIRFormat("Supply (code and format) or (device and command)")
+
+        if repeat > 0:
+            body_repeat = {"repeat": repeat}
+
+        if "port" in kwargs:
+            body_port = {"port_id": kwargs.get("port")}
+
+        if "dock" in kwargs:
+            dock_name = kwargs.get("dock")
+            emitter = next(
+                (dock for dock in self._docks if dock.get("name") == dock_name), None
+            )
+        else:
+            emitter = self._docks[0].get("device_id")
+
+        if emitter is None:
+            raise NoEmitterFound("No emitter could be found with the supplied criteria")
+
+        body_merged = {**body, **body_repeat, **body_port}
+
+        async with self.client() as session:
+            async with session.put(
+                self.url("ir/emitters/" + emitter + "/send"), json=body_merged
+            ) as response:
+                await self.raise_on_error(response)
+                response = await response.json()
+                return response == 200
+
+    async def get_status(self) -> str:
+        """Get usage stats from the remote"""
+        async with self.client() as session:
+            async with session.get(self.url("pub/status")) as response:
+                await self.raise_on_error(response)
+                status = await response.json()
+                self._memory_total = status.get("memory").get("total_memory") / 1048576
+                self._memory_available = (
+                    status.get("memory").get("available_memory") / 1048576
+                )
+
+                self._storage_total = (
+                    status.get("filesystem").get("user_data").get("used")
+                    + status.get("filesystem").get("user_data").get("available")
+                    / 1048576
+                )
+                self._storage_available = (
+                    status.get("filesystem").get("user_data").get("available") / 1048576
+                )
 
     async def update(self):
         """Retrivies all information about the remote"""
@@ -384,6 +601,7 @@ class UCRemote:
         await self.get_remote_update_information()
         await self.get_remote_configuration()
         await self.get_remote_information()
+        await self.get_status()
 
 
 class Activity:
