@@ -448,7 +448,7 @@ class UCRemote:
         """POST a system command to the remote"""
         if cmd in SYSTEM_COMMANDS:
             async with self.client() as session:
-                async with session.post(self.url("/system?cmd=" + cmd)) as response:
+                async with session.post(self.url("system?cmd=" + cmd)) as response:
                     await self.raise_on_error(response)
                     response = await response.json()
                     return response
