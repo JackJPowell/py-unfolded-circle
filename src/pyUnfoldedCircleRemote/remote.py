@@ -116,6 +116,7 @@ class UCRemote:
         self._memory_available = 0
         self._storage_total = 0
         self._storage_available = 0
+        self._cpu_load = {}
         self._remotes = []
         self._docks = []
         self._ir_custom = []
@@ -592,6 +593,10 @@ class UCRemote:
                 )
                 self._storage_available = (
                     status.get("filesystem").get("user_data").get("available") / 1048576
+                )
+
+                self._cpu_load = (
+                    status.get("load_avg")
                 )
 
     async def update(self):
