@@ -13,8 +13,6 @@ import zeroconf
 ZEROCONF_TIMEOUT = 3
 ZEROCONF_SERVICE_TYPE = "_uc-remote._tcp.local."
 
-AUTH_APIKEY_NAME = "pyUnfoldedCircle"
-AUTH_USERNAME = "web-configurator"
 SYSTEM_COMMANDS = [
     "STANDBY",
     "REBOOT",
@@ -96,6 +94,9 @@ class RemoteGroup(list):
 
 class Remote:
     """Unfolded Circle Remote Class."""
+    AUTH_APIKEY_NAME = "pyUnfoldedCircle"
+    AUTH_USERNAME = "web-configurator"
+    
 
     def __init__(self, api_url, pin=None, apikey=None) -> None:
         """Create a new UC Remote Object."""
@@ -293,7 +294,7 @@ class Remote:
                 headers=headers, timeout=aiohttp.ClientTimeout(total=5)
             )
         if self.pin:
-            auth = aiohttp.BasicAuth(AUTH_USERNAME, self.pin)
+            auth = aiohttp.BasicAuth(self.AUTH_USERNAME, self.pin)
             return aiohttp.ClientSession(
                 auth=auth, timeout=aiohttp.ClientTimeout(total=2)
             )
@@ -324,7 +325,7 @@ class Remote:
 
     async def create_api_key(self) -> str:
         """Create api Key."""
-        body = {"name": AUTH_APIKEY_NAME, "scopes": ["admin"]}
+        body = {"name": self.AUTH_APIKEY_NAME, "scopes": ["admin"]}
 
         async with self.client() as session, session.post(
             self.url("auth/api_keys"), json=body
