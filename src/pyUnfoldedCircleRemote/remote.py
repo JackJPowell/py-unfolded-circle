@@ -113,12 +113,22 @@ class Remote:
         self._manufacturer = "Unfolded Circle"
         self._battery_level = 0
         self._battery_status = ""
-        self._is_charging = bool
+        self._is_charging = False
         self._ambient_light_intensity = 0
+        self._display_auto_brightness = False
+        self._display_brightness = 0
+        self._button_backlight = False
+        self._button_backlight_brightness = 0
+        self._sound_effects = False
+        self._sound_effects_volume = 0
+        self._haptic_feedback = False
+        self._display_timeout = 0
+        self._wakeup_sensitivity = 0
+        self._sleep_timeout = 0
         self._update_in_progress = False
         self._next_update_check_date = ""
         self._sw_version = ""
-        self._automatic_updates = bool
+        self._automatic_updates = False
         self._available_update = []
         self._latest_sw_version = ""
         self._release_notes_url = ""
@@ -189,6 +199,56 @@ class Remote:
         """Integer of lux."""
         return self._ambient_light_intensity
 
+    @property
+    def display_auto_brightness(self):
+        """Boolean - Is auto brightness enabled"""
+        return self._display_auto_brightness
+    
+    @property
+    def display_brightness(self):
+        """Display Brightness Level (0-100)"""
+        return self._display_brightness
+    
+    @property
+    def button_backlight(self):
+        """Boolean - Is button backlight enabled"""
+        return self._button_backlight
+    
+    @property
+    def button_backlight_brightness(self):
+        """Button Backlight Brightness Level (0-100)"""
+        return self._button_backlight_brightness
+    
+    @property
+    def sound_effects(self):
+        """Boolean - Are sound effects enabled"""
+        return self._sound_effects
+    
+    @property
+    def sound_effects_volume(self):
+        """Sound effect volume level (0-100)"""
+        return self._sound_effects_volume
+    
+    @property
+    def haptic_feedback(self):
+        """Boolean - Are haptics enabled"""
+        return self._haptic_feedback
+    
+    @property
+    def display_timeout(self):
+        """Display timeout in seconds (0-60)"""
+        return self._display_timeout
+    
+    @property
+    def wakeup_sensitivity(self):
+        """Remote wake sensitivity level (0-3)"""
+        return self._wakeup_sensitivity
+    
+    @property
+    def sleep_timeout(self):
+        """Remote sleep timeout in seconds (0-1800)"""
+        return self._sleep_timeout
+    
     @property
     def manufacturer(self):
         """Remote Manufacturer."""
@@ -374,7 +434,7 @@ class Remote:
     async def get_activities(self):
         """Return activities from Unfolded Circle Remote."""
         async with self.client() as session, session.get(
-            self.url("activities")
+            self.url("activities?limit=100")
         ) as response:
             await self.raise_on_error(response)
             for activity in await response.json():
@@ -426,6 +486,137 @@ class Remote:
             self._ambient_light_intensity = information["intensity"]
             return self._ambient_light_intensity
 
+    async def get_remote_display_settings(self) -> str:
+        """Get remote display settings"""
+        async with self.client() as session, session.get(
+            self.url('/cfg/display')
+        ) as response:
+            await self.raise_on_error(response)
+            settings = await response.json()
+            self._display_auto_brightness = settings.get("auto_brightness")
+            self._display_brightness = settings.get("brightness")
+            return settings
+        
+    async def patch_remote_display_settings(self, auto_brightness=None, brightness=None) -> bool:
+        """Update remote display settings"""
+        display_settings = await self.get_remote_display_settings()
+        if auto_brightness is not None:
+            display_settings["brightness"] = brightness
+        if brightness is not None:
+            display_settings["auto_brightness"] = auto_brightness
+
+        async with self.client() as session, session.patch(
+            self.url('/cfg/display'), json=display_settings
+        ) as response:
+            await self.raise_on_error(response)
+            response = await response.json()
+            return True
+
+    async def get_remote_button_settings(self) -> str:
+        """Get remote button settings"""
+        async with self.client() as session, session.get(
+            self.url('/cfg/button')
+        ) as response:
+            await self.raise_on_error(response)
+            settings = await response.json()
+            self._button_backlight = settings.get("auto_brightness")
+            self._button_backlight_brightness = settings.get("brightness")
+            return settings
+        
+    async def patch_remote_button_settings(self, auto_brightness=None, brightness=None) -> bool:
+        """Update remote display settings"""
+        display_settings = await self.get_remote_display_settings()
+        if auto_brightness is not None:
+            display_settings["brightness"] = brightness
+        if brightness is not None:
+            display_settings["auto_brightness"] = auto_brightness
+
+        async with self.client() as session, session.patch(
+            self.url('/cfg/display'), json=display_settings
+        ) as response:
+            await self.raise_on_error(response)
+            response = await response.json()
+            return True
+    
+    async def get_remote_sound_settings(self) -> str:
+        """Get remote sound settings"""
+        async with self.client() as session, session.get(
+            self.url('/cfg/sound')
+        ) as response:
+            await self.raise_on_error(response)
+            settings = await response.json()
+            self._sound_effects = settings.get("enabled")
+            self._sound_effects_volume = settings.get("volume")
+            return settings
+        
+    async def patch_remote_sound_settings(self, sound_effects=None, sound_effects_volume=None) -> bool:
+        """Update remote sound settings"""
+        sound_settings = await self.get_remote_sound_settings()
+        if sound_effects is not None:
+            sound_settings["enabled"] = sound_effects
+        if sound_effects_volume is not None:
+            sound_settings["volume"] = sound_effects_volume
+
+        async with self.client() as session, session.patch(
+            self.url('/cfg/sound'), json=sound_settings
+        ) as response:
+            await self.raise_on_error(response)
+            response = await response.json()
+            return True
+
+    async def get_remote_haptic_settings(self) -> str:
+        """Get remote haptic settings"""
+        async with self.client() as session, session.get(
+            self.url('/cfg/haptic')
+        ) as response:
+            await self.raise_on_error(response)
+            settings = await response.json()
+            self._haptic_feedback = settings.get("enabled")
+            return settings
+        
+    async def patch_remote_haptic_settings(self, haptic_feedback=None) -> bool:
+        """Update remote haptic settings"""
+        haptic_settings = await self.get_remote_haptic_settings()
+        if haptic_feedback is not None:
+            haptic_settings["enabled"] = haptic_feedback
+
+        async with self.client() as session, session.patch(
+            self.url('/cfg/haptic'), json=haptic_settings
+        ) as response:
+            await self.raise_on_error(response)
+            response = await response.json()
+            return True
+
+    async def get_remote_power_saving_settings(self) -> str:
+        """Get remote power saving settings"""
+        async with self.client() as session, session.get(
+            self.url('/cfg/power_saving')
+        ) as response:
+            await self.raise_on_error(response)
+            settings = await response.json()
+            self._display_timeout = settings.get("display_off_sec")
+            self._wakeup_sensitivity = settings.get("wakeup_sensitivity")
+            self._sleep_timeout = settings.get("standby_sec")
+            return settings
+        
+    async def patch_remote_power_saving_settings(self, display_timeout=None, 
+                                                 wakeup_sensitivity=None, sleep_timeout=None) -> bool:
+        """Update remote power saving settings"""
+        power_saving_settings = await self.get_remote_power_saving_settings()
+        if display_timeout is not None:
+            power_saving_settings["display_off_sec"] = display_timeout
+        if wakeup_sensitivity is not None:
+            power_saving_settings["wakeup_sensitivity"] = wakeup_sensitivity
+        if sleep_timeout is not None:
+            power_saving_settings["standby_sec"] = sleep_timeout
+
+        async with self.client() as session, session.patch(
+            self.url('/cfg/power_saving'), json=power_saving_settings
+        ) as response:
+            await self.raise_on_error(response)
+            response = await response.json()
+            return True
+        
     async def get_remote_update_information(self) -> bool:
         """Get remote update information."""
         async with self.client() as session, session.get(
