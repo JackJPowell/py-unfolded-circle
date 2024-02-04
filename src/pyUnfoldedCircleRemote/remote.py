@@ -822,6 +822,11 @@ class Remote:
             self.get_remote_configuration(),
             self.get_remote_information(),
             self.get_stats(),
+            self.get_remote_display_settings(),
+            self.get_remote_button_settings(),
+            self.get_remote_sound_settings(),
+            self.get_remote_haptic_settings(),
+            self.get_remote_power_saving_settings(),
         )
         await group
 
