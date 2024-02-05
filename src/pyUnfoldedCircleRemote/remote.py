@@ -489,7 +489,7 @@ class Remote:
     async def get_remote_display_settings(self) -> str:
         """Get remote display settings"""
         async with self.client() as session, session.get(
-            self.url('/cfg/display')
+            self.url('cfg/display')
         ) as response:
             await self.raise_on_error(response)
             settings = await response.json()
@@ -501,12 +501,12 @@ class Remote:
         """Update remote display settings"""
         display_settings = await self.get_remote_display_settings()
         if auto_brightness is not None:
-            display_settings["brightness"] = brightness
-        if brightness is not None:
             display_settings["auto_brightness"] = auto_brightness
+        if brightness is not None:
+            display_settings["brightness"] = brightness
 
         async with self.client() as session, session.patch(
-            self.url('/cfg/display'), json=display_settings
+            self.url('cfg/display'), json=display_settings
         ) as response:
             await self.raise_on_error(response)
             response = await response.json()
@@ -515,7 +515,7 @@ class Remote:
     async def get_remote_button_settings(self) -> str:
         """Get remote button settings"""
         async with self.client() as session, session.get(
-            self.url('/cfg/button')
+            self.url('cfg/button')
         ) as response:
             await self.raise_on_error(response)
             settings = await response.json()
@@ -524,15 +524,15 @@ class Remote:
             return settings
         
     async def patch_remote_button_settings(self, auto_brightness=None, brightness=None) -> bool:
-        """Update remote display settings"""
-        display_settings = await self.get_remote_display_settings()
+        """Update remote button settings"""
+        button_settings = await self.get_remote_button_settings()
         if auto_brightness is not None:
-            display_settings["brightness"] = brightness
+            button_settings["auto_brightness"] = auto_brightness
         if brightness is not None:
-            display_settings["auto_brightness"] = auto_brightness
+            button_settings["brightness"] = brightness
 
         async with self.client() as session, session.patch(
-            self.url('/cfg/display'), json=display_settings
+            self.url('cfg/button'), json=button_settings
         ) as response:
             await self.raise_on_error(response)
             response = await response.json()
@@ -541,7 +541,7 @@ class Remote:
     async def get_remote_sound_settings(self) -> str:
         """Get remote sound settings"""
         async with self.client() as session, session.get(
-            self.url('/cfg/sound')
+            self.url('cfg/sound')
         ) as response:
             await self.raise_on_error(response)
             settings = await response.json()
@@ -558,7 +558,7 @@ class Remote:
             sound_settings["volume"] = sound_effects_volume
 
         async with self.client() as session, session.patch(
-            self.url('/cfg/sound'), json=sound_settings
+            self.url('cfg/sound'), json=sound_settings
         ) as response:
             await self.raise_on_error(response)
             response = await response.json()
@@ -567,7 +567,7 @@ class Remote:
     async def get_remote_haptic_settings(self) -> str:
         """Get remote haptic settings"""
         async with self.client() as session, session.get(
-            self.url('/cfg/haptic')
+            self.url('cfg/haptic')
         ) as response:
             await self.raise_on_error(response)
             settings = await response.json()
@@ -581,7 +581,7 @@ class Remote:
             haptic_settings["enabled"] = haptic_feedback
 
         async with self.client() as session, session.patch(
-            self.url('/cfg/haptic'), json=haptic_settings
+            self.url('cfg/haptic'), json=haptic_settings
         ) as response:
             await self.raise_on_error(response)
             response = await response.json()
@@ -590,7 +590,7 @@ class Remote:
     async def get_remote_power_saving_settings(self) -> str:
         """Get remote power saving settings"""
         async with self.client() as session, session.get(
-            self.url('/cfg/power_saving')
+            self.url('cfg/power_saving')
         ) as response:
             await self.raise_on_error(response)
             settings = await response.json()
@@ -611,7 +611,7 @@ class Remote:
             power_saving_settings["standby_sec"] = sleep_timeout
 
         async with self.client() as session, session.patch(
-            self.url('/cfg/power_saving'), json=power_saving_settings
+            self.url('cfg/power_saving'), json=power_saving_settings
         ) as response:
             await self.raise_on_error(response)
             response = await response.json()
