@@ -364,6 +364,8 @@ class Remote:
         async with self.client() as session, session.head(
             self.url("activities")
         ) as response:
+            if response.status == 401:
+                raise AuthenticationError
             return response.status == 200
 
     async def raise_on_error(self, response):
