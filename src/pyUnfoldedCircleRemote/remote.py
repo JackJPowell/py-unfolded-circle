@@ -23,7 +23,7 @@ SYSTEM_COMMANDS = [
 ]
 
 
-class HTTPError(Exception):
+class HTTPError(BaseException):
     """Raised when an HTTP operation fails."""
 
     def __init__(self, status_code, message) -> None:
@@ -33,16 +33,11 @@ class HTTPError(Exception):
         super().__init__(self.message, self.status_code)
 
 
-class AuthenticationError(Exception):
+class AuthenticationError(BaseException):
     """Raised when HTTP login fails."""
 
-    def __init__(self, message) -> None:
-        """Raise Auth http error."""
-        self.message = message
-        super().__init__(self.message)
 
-
-class SystemCommandNotFound(Exception):
+class SystemCommandNotFound(BaseException):
     """Raised when an invalid system command is supplied."""
 
     def __init__(self, message) -> None:
@@ -51,7 +46,7 @@ class SystemCommandNotFound(Exception):
         super().__init__(self.message)
 
 
-class InvalidIRFormat(Exception):
+class InvalidIRFormat(BaseException):
     """Raised when invalid or insufficient IR details are passed."""
 
     def __init__(self, message) -> None:
@@ -60,7 +55,7 @@ class InvalidIRFormat(Exception):
         super().__init__(self.message)
 
 
-class NoEmitterFound(Exception):
+class NoEmitterFound(BaseException):
     """Raised when no emitter could be identified from criteria given."""
 
     def __init__(self, message) -> None:
@@ -69,7 +64,7 @@ class NoEmitterFound(Exception):
         super().__init__(self.message)
 
 
-class ApiKeyNotFound(Exception):
+class ApiKeyNotFound(BaseException):
     """Raised when API Key with given name can't be found.
 
     Attributes:
