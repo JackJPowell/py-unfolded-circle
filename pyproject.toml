@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyUnfoldedCircleRemote"
-version = "0.5.2"
+version = "0.6.0"
 authors = [
   { name="Jack Powell", email="jackjpowell@gmail.com" },
 ]
 description = "A python library to interact with the Unfolded Circle Remote"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
