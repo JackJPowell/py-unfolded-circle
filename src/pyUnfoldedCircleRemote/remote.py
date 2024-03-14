@@ -2,6 +2,7 @@
 
 import asyncio
 import copy
+import datetime
 import json
 import logging
 import re
@@ -11,7 +12,6 @@ from urllib.parse import urljoin, urlparse
 
 import aiohttp
 import zeroconf
-from homeassistant.util import utcnow
 
 from .const import (
     AUTH_APIKEY_NAME,
@@ -912,6 +912,8 @@ class Remote:
     async def get_remote_codesets(self) -> list:
         """Get list of remote codesets."""
         ir_data = {}
+        if not self._remotes:
+            await self.get_remotes()
         for remote in self._remotes:
             async with (
                 self.client() as session,
@@ -1191,7 +1193,6 @@ class Remote:
             self.get_remote_haptic_settings(),
             self.get_remote_power_saving_settings(),
             self.get_activities(),
-            self.get_remotes(),
             self.get_remote_codesets(),
             self.get_docks(),
         )
@@ -1366,7 +1367,7 @@ class UCMediaPlayerEntity:
             attributes_changed["media_title"] = self._media_title
         if attributes.get("media_position", None):
             self._media_position = attributes.get("media_position", 0)
-            self._media_position_updated_at = utcnow()
+            self._media_position_updated_at = datetime.datetime.utcnow()
             attributes_changed["media_position"] = self._media_position
         if attributes.get("muted", None):
             self._muted = attributes.get("muted", None)
