@@ -1,11 +1,12 @@
-from pyUnfoldedCircleRemote import remote
+from pyUnfoldedCircleRemote.remote import Remote
+from pyUnfoldedCircleRemote.const import AUTH_APIKEY_NAME
 import asyncio
 
 async def call_api():
-    api = remote.Remote('http://192.168.1.186', pin="9447")
+    api = Remote('http://192.168.1.186', pin="9447")
 
     for key in await api.get_api_keys():
-        if key.get("name") == api.AUTH_APIKEY_NAME:
+        if key.get("name") == AUTH_APIKEY_NAME:
             await api.revoke_api_key()
 
     key = await api.create_api_key()

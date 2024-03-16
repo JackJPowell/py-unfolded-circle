@@ -1,4 +1,2 @@
 .DS_STORE
 dist/*
-test.py
-__pycache__
