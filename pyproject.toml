@@ -1,22 +1,19 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project]
+[tool.poetry]
 name = "pyUnfoldedCircleRemote"
 version = "0.6.3"
-authors = [
-  { name="Jack Powell", email="jackjpowell@gmail.com" },
-]
 description = "A python library to interact with the Unfolded Circle Remote"
+authors = ["Jack Powell <jackjpowell@gmail.com>"]
+license = "MIT"
 readme = "README.md"
-requires-python = ">=3.11"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
+repository = "https://github.com/jackjpowell/py-unfolded-circle"
 
-[project.urls]
-"Homepage" = "https://github.com/jackjpowell/py-unfolded-circle"
-"Bug Tracker" = "https://github.com/jackjpowell/py-unfolded-circle/issues"
+[tool.poetry.dependencies]
+python = "^3.11"
+aiohttp = "^3.9.3"
+
+[tool.poetry.group.dev.dependencies]
+aiohttp = "^3.9.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
