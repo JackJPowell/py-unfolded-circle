@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "pyUnfoldedCircleRemote"
-version = "0.6.3"
+version = "0.6.4"
 description = "A python library to interact with the Unfolded Circle Remote"
 authors = ["Jack Powell <jackjpowell@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/jackjpowell/py-unfolded-circle"
+packages = [{include = "pyUnfoldedCircleRemote", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -14,6 +15,7 @@ websockets = "^12.0"
 
 [tool.poetry.group.dev.dependencies]
 aiohttp = "^3.9.3"
+websockets = "^12.0"
 
 [build-system]
 requires = ["poetry-core"]
