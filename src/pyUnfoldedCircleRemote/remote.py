@@ -798,7 +798,7 @@ class Remote:
             await self.raise_on_error(response)
             information = await response.json()
             self._update_in_progress = information["update_in_progress"]
-            self._next_update_check_date = information["next_check_date"]
+            # self._next_update_check_date = information["next_check_date"]
             self._sw_version = information["installed_version"]
             self._automatic_updates = information["update_check_enabled"]
             if "available" in information:
@@ -826,7 +826,7 @@ class Remote:
             await self.raise_on_error(response)
             information = await response.json()
             self._update_in_progress = information["update_in_progress"]
-            self._next_update_check_date = information["next_check_date"]
+            # self._next_update_check_date = information["next_check_date"]
             self._sw_version = information["installed_version"]
             self._automatic_updates = information["update_check_enabled"]
             if "available" in information:
@@ -927,6 +927,8 @@ class Remote:
     async def get_remote_codesets(self) -> list:
         """Get list of remote codesets."""
         ir_data = {}
+        if not self._remotes:
+            await self.get_remotes()
         for remote in self._remotes:
             async with (
                 self.client() as session,
@@ -1206,7 +1208,6 @@ class Remote:
             self.get_remote_haptic_settings(),
             self.get_remote_power_saving_settings(),
             self.get_activities(),
-            self.get_remotes(),
             self.get_remote_codesets(),
             self.get_docks(),
         )
