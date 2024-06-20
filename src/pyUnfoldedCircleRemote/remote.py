@@ -586,6 +586,8 @@ class Remote:
                             new_activity._play_pause_command = short_press
                         case "POWER":
                             new_activity._power_command = short_press
+                        case "STOP":  # Remote 3
+                            new_activity._stop_command = short_press
                         case _:
                             pass
             return await response.json()
@@ -1426,6 +1428,7 @@ class UCMediaPlayerEntity:
         self._media_duration = 0
         self._media_position = 0
         self._muted = False
+        self._volume = 0.0
         self._media_image_url = None
         self._entity_commands: list[str] = []
         self._media_position_updated_at = None
@@ -1510,6 +1513,10 @@ class UCMediaPlayerEntity:
         return self._muted
 
     @property
+    def volume(self) -> float:
+        return self._volume
+
+    @property
     def is_on(self) -> bool:
         if self._state != "OFF":
             return True
@@ -1536,12 +1543,6 @@ class UCMediaPlayerEntity:
         if attributes.get("media_duration", None):
             self._media_duration = attributes.get("media_duration", 0)
             attributes_changed["media_duration"] = self._media_duration
-            # When media changes, media_duration is sent but not media_position
-            # we assume new position to 0
-            # if attributes.get("media_position", None) is None:
-            #     self._media_position = 0
-            #     self._media_position_updated_at = utcnow()
-            #     attributes_changed["media_position"] = self._media_position
         if attributes.get("media_artist", None):
             self._media_artist = attributes.get("media_artist", None)
             attributes_changed["media_artist"] = self._media_artist
@@ -1553,7 +1554,7 @@ class UCMediaPlayerEntity:
             attributes_changed["media_title"] = self._media_title
         if attributes.get("media_position", None):
             self._media_position = attributes.get("media_position", 0)
-            self._media_position_updated_at = datetime.datetime.utcnow()
+            self._media_position_updated_at = datetime.datetime.now(datetime.UTC)
             attributes_changed["media_position"] = self._media_position
         if attributes.get("muted", None) or attributes.get("muted", None) is False:
             self._muted = attributes.get("muted")
@@ -1561,6 +1562,8 @@ class UCMediaPlayerEntity:
         if attributes.get("media_type", None):
             self._media_type = attributes.get("media_type", None)
             attributes_changed["media_type"] = self._media_type
+        if attributes.get("volume", None):
+            self._volume = float(attributes.get("volume", None))
         _LOGGER.debug("UC2 attributes changed %s", attributes_changed)
         return attributes_changed
 
@@ -1657,6 +1660,31 @@ class UCMediaPlayerEntity:
         ):
             await self._remote.raise_on_error(response)
 
+    async def volume_set(self, volume: int) -> None:
+        """Raise volume of the media player."""
+        int_volume = int(volume)
+        entity_id = self.id
+        body = {
+            "entity_id": entity_id,
+            "cmd_id": "media_player.volume",
+            "params": {"volume": int_volume},
+        }
+        if self.activity.volume_mute_command:
+            entity_id = self.activity.volume_mute_command.get("entity_id")
+            if "media_player." in entity_id:
+                body = {
+                    "entity_id": entity_id,
+                    "cmd_id": "media_player.volume",
+                    "params": {"volume": int_volume},
+                }
+        async with (
+            self._remote.client() as session,
+            session.put(
+                self._remote.url("entities/" + entity_id + "/command"), json=body
+            ) as response,
+        ):
+            await self._remote.raise_on_error(response)
+
     async def play_pause(self) -> None:
         """Play pause the media player."""
         entity_id = self.id
@@ -1702,39 +1730,39 @@ class UCMediaPlayerEntity:
         ):
             await self._remote.raise_on_error(response)
 
-    # async def stop(self) -> None:
-    #     """Stop the media player."""
-    #     entity_id = self.id
-    #     body = {"entity_id": entity_id, "cmd_id": "media_player.stop"}
-    #     if self.activity.stop_command:
-    #         body = self.activity.stop_command
-    #         entity_id = self.activity.stop_command.get("entity_id")
-    #     async with (
-    #         self._remote.client() as session,
-    #         session.put(
-    #             self._remote.url("entities/" + entity_id + "/command"), json=body
-    #         ) as response,
-    #     ):
-    #         await self._remote.raise_on_error(response)
+    async def stop(self) -> None:
+        """Stop the media player."""
+        entity_id = self.id
+        body = {"entity_id": entity_id, "cmd_id": "media_player.stop"}
+        if self.activity.stop_command:
+            body = self.activity.stop_command
+            entity_id = self.activity.stop_command.get("entity_id")
+        async with (
+            self._remote.client() as session,
+            session.put(
+                self._remote.url("entities/" + entity_id + "/command"), json=body
+            ) as response,
+        ):
+            await self._remote.raise_on_error(response)
 
-    # async def seek(self, position: float) -> None:
-    #     """Next track/chapter of the media player."""
-    #     entity_id = self.id
-    #     body = {
-    #         "entity_id": entity_id,
-    #         "cmd_id": "media_player.seek",
-    #         "params": {"media_position": position},
-    #     }
-    #     if self.activity.seek_command:
-    #         body = self.activity.seek_command
-    #         entity_id = self.activity.seek_command.get("entity_id")
-    #     async with (
-    #         self._remote.client() as session,
-    #         session.put(
-    #             self._remote.url("entities/" + entity_id + "/command"), json=body
-    #         ) as response,
-    #     ):
-    #         await self._remote.raise_on_error(response)
+    async def seek(self, position: float) -> None:
+        """Skip to given media position of the media player."""
+        entity_id = self.id
+        body = {
+            "entity_id": entity_id,
+            "cmd_id": "media_player.seek",
+            "params": {"media_position": position},
+        }
+        if self.activity.seek_command:
+            body = self.activity.seek_command
+            entity_id = self.activity.seek_command.get("entity_id")
+        async with (
+            self._remote.client() as session,
+            session.put(
+                self._remote.url("entities/" + entity_id + "/command"), json=body
+            ) as response,
+        ):
+            await self._remote.raise_on_error(response)
 
 
 class ActivityGroup:
