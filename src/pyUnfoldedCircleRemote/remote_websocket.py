@@ -66,7 +66,8 @@ class RemoteWebsocket(Websocket):
         """Initialize websocket connection with the registered API key."""
         await self.close_websocket()
         _LOGGER.debug(
-            "UnfoldedCircleRemote websocket init connection to %s", self.endpoint
+            "UnfoldedCircleRemote websocket init connection to %s",
+            self.endpoint,
         )
 
         first = True
@@ -159,7 +160,8 @@ class RemoteWebsocket(Websocket):
         if self.session is None:
             return
         response = self.session.post(
-            self.api_endpoint + "/pub/logout", params={"id": self.session.cookies["id"]}
+            self.api_endpoint + "/pub/logout",
+            params={"id": self.session.cookies["id"]},
         )
         _LOGGER.info("Logout %d", response.status_code)
         self.session = None

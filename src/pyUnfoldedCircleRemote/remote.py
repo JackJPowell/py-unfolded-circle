@@ -27,6 +27,7 @@ from .dock import Dock
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class HTTPError(BaseException):
     """Raised when an HTTP operation fails."""
 
@@ -1763,7 +1764,8 @@ class UCMediaPlayerEntity:
         async with (
             self._remote.client() as session,
             session.put(
-                self._remote.url("entities/" + entity_id + "/command"), json=body
+                self._remote.url("entities/" + entity_id + "/command"),
+                json=body,
             ) as response,
         ):
             await self._remote.raise_on_error(response)
@@ -1779,7 +1781,8 @@ class UCMediaPlayerEntity:
         async with (
             self._remote.client() as session,
             session.put(
-                self._remote.url("entities/" + entity_id + "/command"), json=body
+                self._remote.url("entities/" + entity_id + "/command"),
+                json=body,
             ) as response,
         ):
             await self._remote.raise_on_error(response)
@@ -1811,7 +1814,8 @@ class UCMediaPlayerEntity:
         async with (
             self._remote.client() as session,
             session.put(
-                self._remote.url("entities/" + entity_id + "/command"), json=body
+                self._remote.url("entities/" + entity_id + "/command"),
+                json=body,
             ) as response,
         ):
             await self._remote.raise_on_error(response)
@@ -1826,7 +1830,8 @@ class UCMediaPlayerEntity:
         async with (
             self._remote.client() as session,
             session.put(
-                self._remote.url("entities/" + entity_id + "/command"), json=body
+                self._remote.url("entities/" + entity_id + "/command"),
+                json=body,
             ) as response,
         ):
             await self._remote.raise_on_error(response)
@@ -1841,7 +1846,8 @@ class UCMediaPlayerEntity:
         async with (
             self._remote.client() as session,
             session.put(
-                self._remote.url("entities/" + entity_id + "/command"), json=body
+                self._remote.url("entities/" + entity_id + "/command"),
+                json=body,
             ) as response,
         ):
             await self._remote.raise_on_error(response)
@@ -1866,7 +1872,8 @@ class UCMediaPlayerEntity:
         async with (
             self._remote.client() as session,
             session.put(
-                self._remote.url("entities/" + entity_id + "/command"), json=body
+                self._remote.url("entities/" + entity_id + "/command"),
+                json=body,
             ) as response,
         ):
             await self._remote.raise_on_error(response)
@@ -1881,7 +1888,8 @@ class UCMediaPlayerEntity:
         async with (
             self._remote.client() as session,
             session.put(
-                self._remote.url("entities/" + entity_id + "/command"), json=body
+                self._remote.url("entities/" + entity_id + "/command"),
+                json=body,
             ) as response,
         ):
             await self._remote.raise_on_error(response)
@@ -1896,7 +1904,8 @@ class UCMediaPlayerEntity:
         async with (
             self._remote.client() as session,
             session.put(
-                self._remote.url("entities/" + entity_id + "/command"), json=body
+                self._remote.url("entities/" + entity_id + "/command"),
+                json=body,
             ) as response,
         ):
             await self._remote.raise_on_error(response)
@@ -1911,7 +1920,8 @@ class UCMediaPlayerEntity:
         async with (
             self._remote.client() as session,
             session.put(
-                self._remote.url("entities/" + entity_id + "/command"), json=body
+                self._remote.url("entities/" + entity_id + "/command"),
+                json=body,
             ) as response,
         ):
             await self._remote.raise_on_error(response)
@@ -1926,7 +1936,8 @@ class UCMediaPlayerEntity:
         async with (
             self._remote.client() as session,
             session.put(
-                self._remote.url("entities/" + entity_id + "/command"), json=body
+                self._remote.url("entities/" + entity_id + "/command"),
+                json=body,
             ) as response,
         ):
             await self._remote.raise_on_error(response)
@@ -1945,7 +1956,8 @@ class UCMediaPlayerEntity:
         async with (
             self._remote.client() as session,
             session.put(
-                self._remote.url("entities/" + entity_id + "/command"), json=body
+                self._remote.url("entities/" + entity_id + "/command"),
+                json=body,
             ) as response,
         ):
             await self._remote.raise_on_error(response)
