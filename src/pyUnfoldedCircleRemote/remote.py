@@ -529,7 +529,7 @@ class Remote:
             ):
                 await self.raise_on_error(response)
                 return await response.json()
-        raise ExternalSystemNotRegistered
+        raise ExternalSystemNotRegistered("Failed to get tokens from the remote")
 
     async def set_token_for_external_system(
         self,
@@ -635,7 +635,7 @@ class Remote:
             ):
                 await self.raise_on_error(response)
                 return await response.json()
-        raise ExternalSystemNotRegistered
+        raise ExternalSystemNotRegistered("Failed to delete tokens from the remote")
 
     async def is_external_system_valid(self, system) -> bool:
         """Checks against the registered external systems on the remote
