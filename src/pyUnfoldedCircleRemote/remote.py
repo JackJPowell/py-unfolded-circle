@@ -115,7 +115,9 @@ class RemoteGroup(list):
 class Remote:
     """Unfolded Circle Remote Class."""
 
-    def __init__(self, api_url, pin=None, apikey=None, wake_if_asleep: bool = True) -> None:
+    def __init__(
+        self, api_url, pin=None, apikey=None, wake_if_asleep: bool = True
+    ) -> None:
         """Create a new UC Remote Object."""
         self.endpoint = self.validate_url(api_url)
         self.configuration_url = self.derive_configuration_url()
@@ -467,7 +469,7 @@ class Remote:
                 auth=auth, timeout=aiohttp.ClientTimeout(total=2)
             )
 
-    async def validate_connect(self) -> bool:
+    async def validate_connection(self) -> bool:
         """Validate we can communicate with the remote given the supplied information."""
         async with (
             self.client() as session,
