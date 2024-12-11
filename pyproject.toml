@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyUnfoldedCircleRemote"
-version = "0.12.4"
+version = "0.12.5"
 description = "A python library to interact with the Unfolded Circle Remote"
 authors = ["Jack Powell <jackjpowell@gmail.com>"]
 license = "MIT"
