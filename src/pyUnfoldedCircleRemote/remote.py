@@ -360,6 +360,8 @@ class Remote:
         """Remote Hardware Revision."""
         if self._hw_revision == "rev2":
             return "Revision 2"
+        elif self._hw_revision == "rev3":
+            return "Revision 3"
         else:
             return self._hw_revision
 
