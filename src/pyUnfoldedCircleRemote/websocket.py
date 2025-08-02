@@ -5,7 +5,6 @@ import logging
 from typing import Callable, Coroutine
 from urllib.parse import urlparse
 from requests import Session
-import websockets
 
 from .const import AUTH_APIKEY_NAME
 
