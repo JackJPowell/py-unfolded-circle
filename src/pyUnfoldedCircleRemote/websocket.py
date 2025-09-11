@@ -4,23 +4,12 @@ import json
 import logging
 from typing import Callable, Coroutine
 from urllib.parse import urlparse
+
 from requests import Session
 
 from .const import AUTH_APIKEY_NAME
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class LoggerAdapter(logging.LoggerAdapter):
-    """Logger class for websocket for debugging.
-    Add connection ID and client IP address to websockets logs."""
-
-    def process(self, msg, kwargs):
-        try:
-            websocket = kwargs["extra"]["websocket"]
-        except KeyError:
-            return msg, kwargs
-        return f"{websocket.id} {msg}", kwargs
 
 
 class Websocket:
@@ -47,18 +36,15 @@ class Websocket:
         else:
             self.protocol = "ws"
 
-        self.endpoint = api_url
+        self.endpoint = f"{self.protocol}://{self.hostname}/ws"
         self.api_endpoint = api_url
-        self.events_to_subscribe = [
-            "software_updates",
-        ]
+        self.events_to_subscribe = ["software_updates"]
 
     async def init_websocket(
         self,
         receive_callback: Callable[..., Coroutine],
         reconnection_callback: Callable[..., Coroutine],
     ):
-        """init_websocket"""
         pass
 
     async def close_websocket(self):
@@ -91,4 +77,3 @@ class Websocket:
                 "UnfoldedCircle error while sending message %s",
                 ex,
             )
-            raise ex
