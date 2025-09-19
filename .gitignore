@@ -1,3 +1,4 @@
 .DS_STORE
 dist/*
 poetry.lock
+__pycache__/
