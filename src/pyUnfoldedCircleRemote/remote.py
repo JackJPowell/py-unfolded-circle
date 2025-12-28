@@ -246,7 +246,7 @@ class Remote:
         self._docks: list[Dock] = []
         self._wake_if_asleep = wake_if_asleep
         self._wake_on_lan: bool = False
-        self._wake_on_lan_retries = 2
+        self._wake_on_lan_retries = 3
         self._wake_on_lan_available: bool = False
         self._external_entity_configuration_available: bool = False
         self._bt_enabled: bool = False
@@ -650,7 +650,7 @@ class Remote:
         mac_address: str,
         api_url: str,
         wait_for_confirmation: bool = True,
-        retries: int = 2,
+        retries: int = 3,
     ) -> bool:
         """Sends a magic packet to wake a device by MAC address.
 
@@ -2541,15 +2541,36 @@ class Remote:
         if not locale:
             locale = self._localization_info.language_code
 
+        # Handle None or empty text
+        if not text:
+            return default_text
+
         if isinstance(text, str):
             return text
 
+        # Try exact locale match
         if text.get(locale):
             return text.get(locale)
-        elif text.get("en_US"):
+
+        # Try locale without region (e.g., "de" from "de_DE")
+        if "_" in locale:
+            base_locale = locale.split("_")[0]
+            if text.get(base_locale):
+                return text.get(base_locale)
+
+        # Try common fallbacks
+        if text.get("en_US"):
             return text.get("en_US")
         elif text.get("en"):
             return text.get("en")
+
+        # If still no match, try to return any available language
+        # This handles cases where only specific languages are defined
+        if text:
+            for value in text.values():
+                if value:  # Return first non-empty value
+                    return value
+
         return default_text
 
 
