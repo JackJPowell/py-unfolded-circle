@@ -188,7 +188,7 @@ class Remote:
         self, api_url, pin=None, apikey=None, wake_if_asleep: bool = True
     ) -> None:
         """Create a new UC Remote Object."""
-        self.endpoint = self.validate_url(api_url)
+        self.endpoint = Remote.validate_url(api_url)
         self.configuration_url = self.derive_configuration_url()
         self.apikey = apikey
         self.pin = pin
@@ -665,7 +665,7 @@ class Remote:
         """
         # Validate and normalize the API URL
         validated_url = cls.validate_url(api_url)
-        
+
         send_magic_packet(mac_address)
 
         if not wait_for_confirmation:
