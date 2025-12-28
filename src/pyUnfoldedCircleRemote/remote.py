@@ -562,7 +562,8 @@ class Remote:
         return self._localization_info
 
     ### URL Helpers ###
-    def validate_url(self, uri):
+    @staticmethod
+    def validate_url(uri):
         """Validate passed in URL and attempts to correct api endpoint if path isn't supplied."""
         if re.search("^http.*", uri) is None:
             uri = (
@@ -662,6 +663,9 @@ class Remote:
         Returns:
             bool: True if device was woken successfully, False otherwise
         """
+        # Validate and normalize the API URL
+        validated_url = cls.validate_url(api_url)
+        
         send_magic_packet(mac_address)
 
         if not wait_for_confirmation:
@@ -673,7 +677,7 @@ class Remote:
             try:
                 async with aiohttp.ClientSession() as session:
                     async with session.get(
-                        urljoin(api_url, "pub/status"),
+                        urljoin(validated_url, "pub/status"),
                         timeout=aiohttp.ClientTimeout(total=2),
                     ) as response:
                         if response.status == 200:
