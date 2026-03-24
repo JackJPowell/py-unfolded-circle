@@ -1,13 +1,27 @@
-[tool.poetry]
+[project]
 name = "pyUnfoldedCircleRemote"
-version = "0.15.6"
+version = "0.15.7"
 description = "A python library to interact with the Unfolded Circle Remote"
-authors = ["Jack Powell <jackjpowell@gmail.com>"]
-license = "MIT"
+authors = [
+    { name = "Jack Powell", email = "jackjpowell@gmail.com" }
+]
+license = { text = "MIT" }
 readme = "README.md"
-repository = "https://github.com/jackjpowell/py-unfolded-circle"
-packages = [{include = "pyUnfoldedCircleRemote", from = "src"}]
+requires-python = ">=3.11"
+dependencies = [
+    "aiohttp>=3.9.0",
+    "wakeonlan>=3.0.0",
+    "packaging>=23.0",
+    "zeroconf>=0.131.0",
+    "websockets>=12.0",
+]
+
+[project.urls]
+Repository = "https://github.com/jackjpowell/py-unfolded-circle"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pyUnfoldedCircleRemote"]
