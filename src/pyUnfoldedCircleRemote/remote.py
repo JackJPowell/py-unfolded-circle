@@ -1404,7 +1404,9 @@ class Remote:
             if not await self.wake():
                 raise RemoteIsSleeping
 
-        body = {"id": inhibitor_id, "who": who, "why": why, "delay": delay}
+        body = {"id": inhibitor_id, "who": who, "why": why}
+        if delay:
+            body["delay"] = delay  # ty:ignore[invalid-assignment]
         async with (
             self.client() as session,
             session.post(
@@ -2003,7 +2005,6 @@ class Remote:
 
     async def get_ir_emitters(self) -> list:
         """Get list of docks defined."""
-        dock_data = {}
         async with (
             self.client() as session,
             session.get(self.url("ir/emitters")) as response,
@@ -2174,7 +2175,12 @@ class Remote:
             return response == 200
 
     async def send_ir_command_by_emitter(
-        self, emitter_id: str, code: str, format: str, port_id: str | None = None, repeat: int = 0
+        self,
+        emitter_id: str,
+        code: str,
+        format: str,
+        port_id: str | None = None,
+        repeat: int = 0,
     ) -> bool:
         """Send a raw IR command directly to a specific emitter device_id and optional port.
 
