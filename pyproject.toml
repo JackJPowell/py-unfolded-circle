@@ -1,6 +1,6 @@
 [project]
 name = "pyUnfoldedCircleRemote"
-version = "0.16.1"
+version = "0.16.2"
 description = "A python library to interact with the Unfolded Circle Remote"
 authors = [
     { name = "Jack Powell", email = "jackjpowell@gmail.com" }
